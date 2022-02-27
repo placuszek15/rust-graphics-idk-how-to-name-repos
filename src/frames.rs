@@ -8,12 +8,16 @@ pub struct Frame {
 }
 
 impl Frame {
+	pub fn get_position(&self, x:u32, y:u32) -> usize {
+		(y*self.width+x) as usize
+
+	}
 	pub fn set_pixel(&mut self,x:u32,y:u32,pixel:Color) -> () {
 		if x > self.width || y > self.height || x < 0 || y < 0 {
 			panic!("Wrong values for x,y given: {:?}, and maximum {:?}",(x,y),(self.width,self.height) );
 		}
-		
-		self.pixels_buffer[(y*self.width+x) as usize] = pixel.to_int()
+		let position = self.get_position(x,y);
+		self.pixels_buffer[position] = pixel.to_int()
 
 	}
 	pub fn fill(&mut self, pixel:Color) -> () {
@@ -21,7 +25,7 @@ impl Frame {
 			self.pixels_buffer[index as usize] = pixel.to_int()
 		}
 	}
-	pub fn set_box(&mut self, left:u32,top:u32,right:u32, bottom:u32,pixel:Color){
+	pub fn set_box(&mut self, left:u32,top:u32,right:u32, bottom:u32,pixel:Color) -> () {
 		for new_x in (left..right) {
 			for new_y in (top..bottom) {
 				// println!("{}, {}",x+x_offset,y+y_offset );
@@ -30,10 +34,10 @@ impl Frame {
 			} 
 		}
 	}
-	pub fn draw_line(&mut self, x0:u32,y0:u32,x1:u32,y1:u32,pixel:Color) {
-	    let dx = x1 - x0;
-	    let dy = y1 - y0;
-	    let mut D = (2*dy - dx) as i32;
+	pub fn draw_line(&mut self, x0:u32,y0:u32,x1:u32,y1:u32,pixel:Color) -> (){
+	    let dx = x1 as i32 - x0 as i32;
+	    let dy = y1 as i32 - y0 as i32;
+	    let mut D = 2*dy as i32 - dx as i32;
 	    let mut y = y0;
 
 	    for x in (x0..x1) {
@@ -41,10 +45,12 @@ impl Frame {
 	        if D > 0 {
 	            y += 1;
 	            D -= 2*dx as i32 }
-	        D = D + 2*dy as i32
+	        D +=  2*dy as i32
 		}
 	}
-	pub fn draw_8_points(&mut self, xc:u32, yc:u32,x:u32,y:u32,pixel:Color) {
+	pub fn draw_8_points(&mut self, xc:u32, yc:u32,x:u32,y:u32,pixel:Color) -> () {
+
+
 		self.set_pixel(xc+x, yc+y, pixel);
 	    self.set_pixel(xc-x, yc+y, pixel);
 	    self.set_pixel(xc+x, yc-y, pixel);
@@ -55,7 +61,7 @@ impl Frame {
 	    self.set_pixel(xc-y, yc-x, pixel);
 
 	}
-	pub fn draw_circle(&mut self, x_center:u32, y_center:u32,radius:u32,pixel:Color) {
+	pub fn draw_circle(&mut self, x_center:u32, y_center:u32,radius:u32,pixel:Color) -> () {
 		let mut x = 0;
 		let mut y = radius;
 		self.draw_8_points(x_center, y_center, x, y,pixel);
